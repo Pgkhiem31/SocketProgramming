@@ -60,3 +60,11 @@ class Config:
     targets: tuple[tuple[str, int], ...] = ()
     heartbeat: float = 3.0
     expiry: float = 10.0
+
+    @property
+    def origins(self) -> set[str]:
+        return {
+            f"http://{host}:{port}"
+            for host in ("127.0.0.1", "localhost")
+            for port in (self.web_port, 5173)
+        }
