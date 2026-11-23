@@ -1,3 +1,4 @@
+"Tìm và chọn ra cấu hình của card mạng của máy của mình"
 from __future__ import annotations
 
 import ipaddress
@@ -36,7 +37,11 @@ def choose_interface(selected : str) -> Interface | None:
         return {"name" : "Loopback" , "ip" : selected , "broadcast": "127.255.255.255"}
     available = interfaces()
     if selected:
-        return next((item for item in available if item["ip"] == selected), None)
+        for item in available:
+            if item["ip"] == selected:
+                return item
+
+        return None
     if not available:
         return None
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
@@ -58,9 +63,9 @@ class Config:
     file_limit: int = FILE_LIMIT
     name: str | None = None
     targets: tuple[tuple[str, int], ...] = ()
-    heartbeat: float = 3.0
-    expiry: float = 10.0
-
+    heartbeat: float = 3.0  #chu kì kiểm tra mỗi lần gửi tín hiếu
+    expiry: float = 10.0    # Nếu quá 10 giây ko thấy thì báo off
+    frontend: Path = ROOT / "frontend" / "dist"
     @property
     def origins(self) -> set[str]:
         return {
