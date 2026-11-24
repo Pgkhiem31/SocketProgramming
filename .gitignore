@@ -5,3 +5,4 @@ __pycache__/
 .lanlink/
 downloads/*
 !downloads/.gitkeep
+.ruff_cache
