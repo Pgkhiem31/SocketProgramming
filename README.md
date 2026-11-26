@@ -6,8 +6,7 @@
 
 Dùng Windows và CPython 3.12 bản 64 bit. Cần Internet để tải thư viện trong lần cài đặt đầu tiên. [Tải Python cho Windows](https://www.python.org/downloads/windows/)
 
-Nếu nhận mã nguồn dưới dạng ZIP, hãy giải nén vào thư mục có quyền ghi. Mở thư mục dự án chứa `main.py` và `requirements.txt`, rồi mở PowerShell ngay tại đó. Có thể gõ `powershell` vào thanh địa chỉ của File Explorer và nhấn Enter.
-Kiểm tra Python, tạo môi trường ảo và cài thư viện.
+Nếu nhận mã nguồn dưới dạng ZIP, hãy giải nén vào thư mục có quyền ghi. Mở thư mục dự án chứa `main.py` và `requirements.txt`, rồi mở PowerShell ngay tại đó. 
 
 ~~~powershell
 py -3.12 --version
@@ -32,13 +31,13 @@ Cách này phù hợp để chấm hoặc trình bày khi chỉ có một máy. 
 **PowerShell 1**
 
 ~~~powershell
-& '.\.venv\Scripts\python.exe' '.\main.py' --name An --interface 127.0.0.1 --tcp-port 5001 --udp-port 9991 --discovery-target 127.0.0.1:9992 --data-dir '.\.lanlink\demo-an' --downloads '.\downloads\an'
+& '.\.venv\Scripts\python.exe' '.\main.py' --name (Nhập tên) --interface 127.0.0.1 --tcp-port 5001 --udp-port 9991 --discovery-target 127.0.0.1:9992 --data-dir '.\.lanlink\demo-an' --downloads '.\downloads\an'
 ~~~
 
 **PowerShell 2**
 
 ~~~powershell
-& '.\.venv\Scripts\python.exe' '.\main.py' --name Binh --interface 127.0.0.1 --tcp-port 5002 --udp-port 9992 --discovery-target 127.0.0.1:9991 --data-dir '.\.lanlink\demo-binh' --downloads '.\downloads\binh'
+& '.\.venv\Scripts\python.exe' '.\main.py' --name (Nhập tên) --interface 127.0.0.1 --tcp-port 5002 --udp-port 9992 --discovery-target 127.0.0.1:9991 --data-dir '.\.lanlink\demo-binh' --downloads '.\downloads\binh'
 ~~~
 
 1. Trong cửa sổ **An**, chờ **Binh** xuất hiện ở danh sách **Thiết bị trong LAN**, rồi chọn **Binh**.

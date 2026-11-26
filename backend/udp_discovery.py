@@ -30,7 +30,11 @@ class Peer:
         return cls(peer_id = str(presence.peer_id) , name = presence.name, avatar = presence.avatar , ip = ip , tcp_port = presence.tcp_port , status = presence.status , last_seen = now() , seen_at = seen_at,)
 
     def public(self) -> Record:
-        return {key: value for key, value in vars(self).items() if key != "seen_at"}
+        result = {}
+        for key , value in self:
+            if key != "seen_at":
+                result[key] = value
+        return result
 
     def to_dict(self) -> Record:
         return self.public()

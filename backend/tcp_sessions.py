@@ -24,7 +24,7 @@ def close_socket(sock : socket.socket ) -> None:
         # shutdown(SHUT_RDWR) có thể báo OSError vì socket này chỉ chờ accept
         #vậy pass để xuống bước tiếp theo để dọn socket lắng nghe và giải phóng tài nguyên
         pass
-    sock.close()
+    socket.close()
 
 class Workers:
     def __init__(self , limit: int = 100):
@@ -38,7 +38,7 @@ class Workers:
             if self.stop.is_set():
                 close_socket(sock)
                 raise LanError("interrupted")
-            self.sockets.add(sock)
+        self.sockets.add(sock)
     def release(self , sock: socket.socket) -> None:
         #vdu A bắm ngắt chat vs B ứng dụng gọi frame "Bye" rồi gọi release để xóa B khỏi sockets
         close_socket(sock) # dừng gửi nhận rồi giải phóng socket
@@ -114,23 +114,18 @@ class Sessions:
             raise
         self.port: int = self.listener.getsockname()[1]
 
-    def start(self) -> None:
-        self.workers.launch("tcp-accept", self._accept)
+    def start(self) -> None:    #khởi chạy luồng đợi kết nối
+        self.workers.launch("tcp-accept", self._accept) #tcp-accept là tên luồng còn self._accept sẽ đc chuyền theo callabale
 
-    @staticmethod
+    @staticmethod #truyền vào ko cần self gọi chung cho toàn bộ
     def _configure(sock: socket.socket) -> None:
-        sock.settimeout(IO_TIMEOUT)
+        sock.settimeout(IO_TIMEOUT) # gọi timeout nếu sau 6s ch nhận đc dữ liệu
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        if hasattr(socket, "SIO_KEEPALIVE_VALS"):
-            sock.ioctl(socket.SIO_KEEPALIVE_VALS, (1, 15000, 3000))
-        elif hasattr(socket, "TCP_KEEPIDLE"):
-            sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 15)
-            if hasattr(socket, "TCP_KEEPINTVL"):
-                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 3)
-            if hasattr(socket, "TCP_KEEPCNT"):
-                sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 3)
+        #Bật TCP keepalive. Khi kết nối im lặng đủ lâu, hệ điều hành có thể gửi gói thăm dò để kiểm tra máy bên kia còn phản hồi qua TCP hay không
+        if hasattr(socket, "SIO_KEEPALIVE_VALS"): #Nhánh Windows: (1, 15000, 3000) nghĩa là bật keepalive (1), gửi gói thăm dò đầu tiên sau 15.000 mili giây kết nối im lặng 
+            sock.ioctl(socket.SIO_KEEPALIVE_VALS, (1, 15000, 3000)) #và chờ 3.000 mili giây giữa các lần thăm dò tiếp theo nếu chưa có phản hồi
 
-    def _accept(self) -> None:
+    def _accept(self) -> None: #hàm chạy trên luồng lắng nghe
         while not self.workers.stop.is_set():
             try:
                 sock, address = self.listener.accept()
@@ -149,14 +144,14 @@ class Sessions:
                 log.debug("TCP accept could not assign a worker: %s", exc)
                 self.workers.release(sock)
 
-    def _hello(self, mode: Literal["chat", "file"], session_id: UUID) -> Hello:
+    def _hello(self, mode: Literal["chat", "file"], session_id: UUID) -> Hello: # tạo lời chào từ thông tin máy bạn, kèm chế độ và mã kết nối
         return Hello(**self.identity().model_dump(), mode=mode, session_id=session_id)
 
-    def _verify(self, hello: Header, ip: str, expected: Peer | None = None) -> tuple[Hello, Record]:
+    def _verify(self, hello: Header, ip: str, expected: Peer | None = None) -> tuple[Hello, Record]: #kiểm tra lời chào nhận được
         if not isinstance(hello, Hello):
-            raise ProtocolError("Expected identity handshake")
-        peer_id = str(hello.peer_id)
-        discovered = expected or self.registry.get(peer_id)
+            raise ProtocolError("Expected identity handshake") #Frame đầu tiên phải là Hello. Ví dụ, nếu phía bên kia gửi thẳng một frame tin nhắn, hàm báo ProtocolError vì hai bên chưa trao đổi lời chào
+        peer_id = str(hello.peer_id) #Nếu có expected, hàm dùng thông tin đó để đối chiếu
+        discovered = expected or self.registry.get(peer_id) #Nếu expected là None, hàm tìm peer_id trong registry, nơi lưu thông tin peer đã phát hiện trong LAN. discovered có thể là None nếu chưa có bản ghi
         if (peer_id == self.registry.own_id or
                 (discovered and (discovered.peer_id, discovered.ip, discovered.tcp_port) !=
                  (peer_id, ip, hello.tcp_port))):
@@ -166,9 +161,9 @@ class Sessions:
             "avatar": hello.avatar, "status": hello.status,
         }
 
-    def _incoming(self, sock: socket.socket, ip: str) -> None:
+    def _incoming(self, sock: socket.socket, ip: str) -> None: #xử lý kết nối đến
         try:
-            hello, peer = self._verify(read_frame(sock)[0], ip)
+            hello, peer = self._verify(read_frame(sock)[0], ip) #
             if hello.mode == "chat" and self.is_paused(peer["peer_id"]):
                 return
             send_frame(sock, self._hello(hello.mode, hello.session_id))
@@ -219,7 +214,7 @@ class Sessions:
                 self.connect(peer_id)
             except LanError as exc:
                 if exc.code == "connection_failed":
-                    return  # connect() has already published the dial failure.
+                    return
                 with self.lock:
                     if peer_id not in self.active and not self.is_paused(peer_id):
                         self._set_state(peer_id, "error", exc.code)
@@ -231,6 +226,7 @@ class Sessions:
 
     def _register(self, peer: Record, sock: socket.socket, initiator: str, session_id: UUID) -> Session | None:
         peer_id = peer["peer_id"]
+        # Hai máy tính cùng thứ tự ưu tiên để chọn một phiên khi cùng chủ động kết nối
         rank = (initiator == min(self.registry.own_id, peer_id), session_id.int)
         session = Session(peer, sock, rank)
         with self.lock:
@@ -249,6 +245,7 @@ class Sessions:
         peer_id = session.peer["peer_id"]
         with self.lock:
             session.closed.set()
+            # Chỉ phiên hiện hành được đổi trạng thái; phiên cũ có thể đã bị thay thế
             if self.active.get(peer_id) is session:
                 del self.active[peer_id]
                 self._set_state(peer_id, "disconnected")
@@ -267,6 +264,7 @@ class Sessions:
             self.retire(session)
 
     def connect(self, peer_id: str) -> Session:
+        # Tuần tự hóa việc mở phiên chat đi cho cùng một thiết bị
         with self.dial_locks[hash(peer_id) % len(self.dial_locks)]:
             peer = self.registry.get(peer_id)
             with self.lock:
@@ -310,6 +308,7 @@ class Sessions:
             session = self.active.pop(peer_id, None)
             if session:
                 session.closed.set()
+            # Tạm dừng để lượt gửi sau không tự mở lại phiên vừa ngắt thủ công
             self._set_state(peer_id, "paused")
         if session:
             try:
