@@ -1,0 +1,45 @@
+/* Màu nền và chữ mặc định của chủ đề sáng. */
+QWidget { background: #ffffff; color: #17283a; font-family: "Segoe UI"; font-size: 13px; }
+QMainWindow, QWidget#history, QScrollArea#chatScroll { background: #eff4f8; }
+QWidget#detailsPanel, QFrame#sidebar, QFrame#mainHeader, QFrame#chatHeader, QFrame#composerArea { background: #ffffff; }
+QFrame#mainHeader, QFrame#chatHeader { border-bottom: 1px solid #ccdae4; }
+QFrame#composerArea { border-top: 1px solid #ccdae4; }
+QLabel { background: transparent; }
+QLabel#wordmark { font-size: 24px; font-weight: 700; color: #14695f; }
+QLabel#section, QLabel#fileName { font-weight: 650; font-size: 14px; }
+QLabel#heading { font-size: 21px; font-weight: 700; }
+QLabel#muted { color: #506477; font-size: 12px; }
+QLabel#eyebrow { font-size: 11px; font-weight: 700; color: #506477; padding-top: 8px; }
+QLabel#networkPill { padding: 5px 10px; border: 1px solid #ccdae4; border-radius: 10px; color: #14695f; background: #eff4f8; }
+QLabel#notice { padding: 3px 13px; color: #17283a; background: #d6eee9; border-top: 1px solid #14695f; }
+QSplitter::handle { background: #ccdae4; width: 3px; }
+QSplitter::handle:hover { background: #14695f; }
+QPushButton, QLineEdit, QTextEdit, QComboBox, QSpinBox {
+    background: #eff4f8; border: 1px solid #ccdae4; border-radius: 7px; padding: 6px 9px;
+    selection-background-color: #14695f; selection-color: #ffffff;
+}
+QPushButton { font-weight: 600; min-height: 20px; }
+QPushButton:hover, QPushButton:checked { background: #e3edf2; border-color: #14695f; }
+/* Kiểu nút chính được chọn qua thuộc tính primary của widget. */
+QPushButton[primary="true"] { background: #14695f; color: #ffffff; border-color: #14695f; }
+QPushButton[primary="true"]:hover { background: #0c544c; border-color: #0c544c; }
+QPushButton:disabled, QLineEdit:disabled, QTextEdit:disabled { color: #506477; background: #ffffff; border-color: #ccdae4; }
+QPushButton:focus, QLineEdit:focus, QTextEdit:focus, QComboBox:focus, QSpinBox:focus { border: 1px solid #14695f; }
+QComboBox QAbstractItemView { background: #ffffff; selection-background-color: #d6eee9; selection-color: #17283a; }
+QListWidget { border: 0; outline: 0; background: #ffffff; }
+QListWidget::item { padding: 2px 6px; margin: 2px 0; border-radius: 7px; }
+QListWidget::item:hover { background: #e3edf2; }
+QListWidget::item:selected { background: #d6eee9; color: #17283a; }
+QFrame#sentBubble { border: 1px solid #b3d5cc; border-radius: 11px; background: #d6eee9; }
+QFrame#receivedBubble, QFrame#transferCard { border: 1px solid #ccdae4; border-radius: 9px; background: #ffffff; }
+QWidget#messageRow { background: #eff4f8; }
+QProgressBar { background: #eff4f8; color: #17283a; border: 1px solid #ccdae4; border-radius: 4px; text-align: center; min-height: 17px; }
+/* Màu phần đã hoàn tất của thanh tiến độ truyền file. */
+QProgressBar::chunk { background: #75bfac; border-radius: 3px; }
+QScrollBar:vertical { background: #eff4f8; width: 10px; margin: 2px; }
+QScrollBar::handle:vertical { background: #ccdae4; min-height: 24px; border-radius: 3px; }
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+QTabWidget::pane { border: 1px solid #ccdae4; border-radius: 6px; }
+QTabBar::tab { padding: 8px 12px; color: #506477; }
+QTabBar::tab:selected { color: #14695f; border-bottom: 2px solid #14695f; }
+

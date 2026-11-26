@@ -33,7 +33,7 @@ MAX_DATAGRAM = 2048
 "đặt giới hạn 2 KiB cho một gói UDP"
 Port = Annotated[int , Field(ge = 1 , le = 65535)]
 "cổng nằm từ 1 -> 65355"
-PrecenseStatus = Literal["online" , "away"]
+PresenceStatus = Literal["online", "away"]
 Avatar = Literal["teal", "blue", "amber", "rose"]
 "Bốn màu cho ava"
 
@@ -52,7 +52,7 @@ class Identity(BaseModel):
     peer_id: UUID
     name: str = Field(min_length = 1 , max_length = 40)
     tcp_port: Port
-    status: PrecenseStatus
+    status: PresenceStatus
     avatar: Avatar = "teal"
 
     @field_validator("name")
@@ -85,6 +85,7 @@ def decode_presence(packet: bytes) -> Presence:
     except (ValueError, RecursionError) as exc:
         raise ProtocolError("Invalid presence") from exc
     "dECODE HEADER -> JSON"
+
 class Frame(BaseModel):
     model_config = ConfigDict(extra = "forbid" , strict = True)
     version: Literal[1] = VERSION

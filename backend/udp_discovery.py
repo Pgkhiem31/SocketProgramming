@@ -20,21 +20,21 @@ class Peer:
     name : str
     avatar : str
     ip : str
-    tcp_port : str
+    tcp_port: int
     status : str
     last_seen : str
-    seen_at : str
+    seen_at: float
 
     @classmethod
     def seen(cls , presence : Presence , ip : str , seen_at : float) -> Peer:
         return cls(peer_id = str(presence.peer_id) , name = presence.name, avatar = presence.avatar , ip = ip , tcp_port = presence.tcp_port , status = presence.status , last_seen = now() , seen_at = seen_at,)
 
-    def to_dict(temp) -> Record: #chuyen dlieu sang dict
-        result = {}
-        for key , value in temp:
-            if key != "seen_at":
-                result[key] = value
-        return result
+    def public(self) -> Record:
+        return {key: value for key, value in vars(self).items() if key != "seen_at"}
+
+    def to_dict(self) -> Record:
+        return self.public()
+
 
 class Registry: #qli cac thiet bi hoat dong trong he thong
     def __init__(self, own_id: str, expiry: float, changed: Callable[[str, Peer], None]):
